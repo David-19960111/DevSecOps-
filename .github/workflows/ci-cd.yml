@@ -148,9 +148,10 @@ jobs:
         run: |
           docker run -d \
             --name inventario-api \
+            --network host \
             -p 8000:8000 \
             ${{ env.DOCKER_IMAGE }}:latest
-          sleep 5  # Esperar que arranque
+          sleep 10  # Esperar que arranque
 
       - name: Verificar que la app responde
         run: curl -f http://localhost:8000/ || exit 1
@@ -161,7 +162,8 @@ jobs:
           target: "http://localhost:8000"
           rules_file_name: "inventario-api/.zap/rules.tsv"
           cmd_options: "-a"         
-          fail_action: false        
+          fail_action: false  
+          allow_issue_writing: false    
 
       - name: Subir reporte ZAP
         uses: actions/upload-artifact@v4
