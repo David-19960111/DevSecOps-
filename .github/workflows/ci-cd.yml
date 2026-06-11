@@ -6,6 +6,11 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+    contents: read
+    issues: write
+    pull-requests: write
+
 env:
   DOCKER_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/inventario-api
 
@@ -107,11 +112,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: docker
     if: github.ref == 'refs/heads/main'
-    permissions:
-      contents: read
-      issues: write
-      pull-requests: write
-    
     steps:
       - uses: actions/checkout@v4
 
@@ -148,7 +148,6 @@ jobs:
         run: |
           docker run -d \
             --name inventario-api \
-            --network host \
             -p 8000:8000 \
             ${{ env.DOCKER_IMAGE }}:latest
           sleep 10  # Esperar que arranque
@@ -157,14 +156,13 @@ jobs:
         run: curl -f http://localhost:8000/ || exit 1
 
       - name: Correr OWASP ZAP Baseline Scan
-        uses: zaproxy/action-baseline@v0.12.0
+        uses: zaproxy/action-baseline@v0.14.0
         with:
           target: "http://localhost:8000"
           rules_file_name: "inventario-api/.zap/rules.tsv"
           cmd_options: "-a"         
           fail_action: false  
-          allow_issue_writing: false 
-          artifact_name: "zap-report-scan"   
+          allow_issue_writing: false  
 
       - name: Subir reporte ZAP
         uses: actions/upload-artifact@v4
@@ -172,6 +170,10 @@ jobs:
         with:
           name: zap-report
           path: report_html.html
+
+      - name: Verificar archivos generados
+        if: always()
+        run: ls -lah
 
       - name: Detener contenedor
         if: always()
