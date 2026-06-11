@@ -1,0 +1,55 @@
+#Python
+__pycache__/
+*.py[cod]
+*.pyo 
+*.pyd 
+.Python 
+*.egg-info/
+dist/
+build/
+.eggs/
+
+#Entornos virtuales
+venv/
+.venv/
+env/
+.env/
+
+#Variables de entorno
+.env 
+.env.local
+.env.production
+*.env 
+
+#Base de datos
+.db
+.sqlite
+.sqlite3
+
+#Testing y coverage
+.pytest_cache/
+.coverage.xml
+.coverage 
+htmlcov/
+test.db 
+
+#Reportes de seguridad
+bandit-report.json
+trivy-report.txt 
+report_html.html 
+zap-report/
+
+#Docker
+.dockerignore
+
+#IDEs y editores
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db 
+
+#Logs
+*.log 
+logs/ 
