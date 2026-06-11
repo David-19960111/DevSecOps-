@@ -32,6 +32,8 @@ jobs:
 
       - name: Correr tests con coverage
         run: pytest tests/ -v --cov=. --cov-report=term-missing
+        env:
+          PYTHONPATH: ${{ github.workspace }}/inventario-api
 
   # ─────────────────────────────────────────
   # JOB 2: SAST con Bandit
@@ -166,15 +168,3 @@ jobs:
       - name: Detener contenedor
         if: always()
         run: docker stop inventario-api && docker rm inventario-api
-
-  # ─────────────────────────────────────────
-  # JOB 6: Deploy
-  # ─────────────────────────────────────────
-  deploy:
-    name: 🚀 Deploy
-    runs-on: ubuntu-latest
-    needs: [trivy, dast]
-    if: github.ref == 'refs/heads/main'
-    steps:
-      - name: Deploy
-        run: echo "Conectá acá tu plataforma de deploy"
