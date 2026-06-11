@@ -163,7 +163,8 @@ jobs:
           rules_file_name: "inventario-api/.zap/rules.tsv"
           cmd_options: "-a"         
           fail_action: false  
-          allow_issue_writing: false    
+          allow_issue_writing: false 
+          artifact_name: "zap-recort-scan"   
 
       - name: Subir reporte ZAP
         uses: actions/upload-artifact@v4
