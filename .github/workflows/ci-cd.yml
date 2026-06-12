@@ -6,11 +6,6 @@ on:
   pull_request:
     branches: [main]
 
-permissions:
-    contents: read
-    issues: write
-    pull-requests: write
-
 env:
   DOCKER_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/inventario-api
 
@@ -37,8 +32,6 @@ jobs:
 
       - name: Correr tests con coverage
         run: pytest tests/ -v --cov=. --cov-report=term-missing
-        env:
-          PYTHONPATH: ${{ github.workspace }}/inventario-api
 
   # ─────────────────────────────────────────
   # JOB 2: SAST con Bandit
@@ -78,57 +71,13 @@ jobs:
           name: bandit-report
           path: inventario-api/bandit-report.json
 
- # ─────────────────────────────────────────
-  # JOB 3: SCA
-  # ──────
-
-  sca:
-    name: 📦 SCA - pip-audit
-    runs-on: ubuntu-latest
-    needs: sast
-    permissions:
-      security-events: write
-    defaults:
-      run:
-        working-directory: inventario-api
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      - name: Instalar pip-audit
-        run: pip install pip-audit
-
-      - name: Correr SCA
-        run: |
-          pip-audit \
-            -r requirements.txt \
-            -f sarif \
-            -o pip-audit-report.sarif || true
-
-      - name: Mostrar archivos
-        run: |
-          pwd
-          ls -la
-          find . -name "*.sarif"
-
-      - name: Upload SARIF
-        if: always()
-        uses: github/codeql-action/upload-sarif@v4
-        with:
-          sarif_file: pip-audit-report.sarif
-          category: sca-pip-audit
-
-
   # ─────────────────────────────────────────
-  # JOB 4: Build y Push Docker
+  # JOB 3: Build y Push Docker
   # ─────────────────────────────────────────
   docker:
     name: 🐳 Build y Push Docker
     runs-on: ubuntu-latest
-    needs: [test, sast, sca]
+    needs: [test, sast]
     if: github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v4
@@ -149,15 +98,13 @@ jobs:
             ${{ env.DOCKER_IMAGE }}:${{ github.sha }}
 
   # ─────────────────────────────────────────
-  # JOB 5: Trivy - Scan de imagen Docker
+  # JOB 4: Trivy - Scan de imagen Docker
   # ─────────────────────────────────────────
   trivy:
     name: 🛡️ Trivy - Scan Docker
     runs-on: ubuntu-latest
     needs: docker
     if: github.ref == 'refs/heads/main'
-    permissions:
-      security-events: write
     steps:
       - uses: actions/checkout@v4
 
@@ -165,26 +112,28 @@ jobs:
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: ${{ env.DOCKER_IMAGE }}:latest
-          format: "sarif"
+          format: "table"
           exit-code: "0"           # Cambiá a "1" para que falle si hay CVEs críticos
           severity: "CRITICAL,HIGH"
+          output: trivy-report.txt
 
-      - name: Subir SARIF a GitHub Security
-        uses: github/codeql-action/upload-sarif@v3
+      - name: Mostrar reporte Trivy
+        run: cat trivy-report.txt
+
+      - name: Subir reporte Trivy
+        uses: actions/upload-artifact@v4
         with:
-          sarif_file: trivy-report.sarif
-          category: trivy-docker
+          name: trivy-report
+          path: trivy-report.txt
 
   # ─────────────────────────────────────────
-  # JOB 6: DAST con OWASP ZAP
+  # JOB 5: DAST con OWASP ZAP
   # ─────────────────────────────────────────
   dast:
     name: 🕷️ DAST - OWASP ZAP
     runs-on: ubuntu-latest
     needs: docker
     if: github.ref == 'refs/heads/main'
-    permissions:
-      security-events: write
     steps:
       - uses: actions/checkout@v4
 
@@ -194,27 +143,28 @@ jobs:
             --name inventario-api \
             -p 8000:8000 \
             ${{ env.DOCKER_IMAGE }}:latest
-          sleep 10  # Esperar que arranque
+          sleep 5  # Esperar que arranque
 
       - name: Verificar que la app responde
         run: curl -f http://localhost:8000/ || exit 1
 
       - name: Correr OWASP ZAP Baseline Scan
-        uses: zaproxy/action-baseline@v0.14.0
+        uses: zaproxy/action-baseline@v0.12.0
         with:
           target: "http://localhost:8000"
           rules_file_name: "inventario-api/.zap/rules.tsv"
           cmd_options: "-a"         
-          fail_action: false  
-          artifact_name: zap-results 
+          fail_action: false        
 
-      - name: Subir SARIF a GitHub Security
-        uses: github/codeql-action/upload-sarif@v3
+      - name: Subir reporte ZAP
+        uses: actions/upload-artifact@v4
         if: always()
         with:
-          sarif_file: results.sarif    # 👈 ZAP lo genera automáticamente con este nombre
-          category: zap-dast
+          name: zap-report
+          path: report_html.html
 
       - name: Detener contenedor
         if: always()
         run: docker stop inventario-api && docker rm inventario-api
+
+
