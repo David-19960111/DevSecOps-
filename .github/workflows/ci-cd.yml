@@ -87,7 +87,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: inventario/api
+        working-directory: inventario-api
 
     steps:
       - name: Checkout code
