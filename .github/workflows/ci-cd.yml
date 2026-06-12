@@ -9,6 +9,7 @@ on:
 permissions:
   contents: read
   security-events: write
+  issues: write
 
 env:
   DOCKER_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/inventario-api
