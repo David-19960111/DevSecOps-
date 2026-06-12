@@ -71,17 +71,19 @@ jobs:
       - name: Convertir JSON a SARIF válido
         run: |
           python3 - <<'EOF'
-          import json
+          import json, os
 
           with open("bandit-report.json") as f:
               bandit = json.load(f)
+
+          sha = os.environ.get("GITHUB_SHA", "unknown")[:8]  # 👈 así lee la env var
 
           sarif = {
               "version": "2.1.0",
               "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
               "runs": [{
                   "automationDetails": {
-                      "id": f"bandit-sast/{sha}/"   
+                      "id": "bandit-sast/" + sha + "/"
                   },
                   "tool": {
                       "driver": {
@@ -118,7 +120,7 @@ jobs:
           with open("bandit-report.sarif", "w") as f:
               json.dump(sarif, f, indent=2)
 
-          print(f"Convertido: {len(sarif['runs'][0]['results'])} resultados")
+          print("SHA: " + sha + " — Convertido: " + str(len(sarif["runs"][0]["results"])) + " resultados")
           EOF
 
       - name: Subir SARIF a GitHub Security
