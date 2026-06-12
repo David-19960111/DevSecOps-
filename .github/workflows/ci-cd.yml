@@ -69,9 +69,60 @@ jobs:
             --severity-level medium || true
 
       - name: Convertir JSON a SARIF válido
-        uses: docker://ghcr.io/microsoft/sarif-multitool:latest
+        run: |
+          python3 - <<'EOF'
+          import json
+
+          with open("bandit-report.json") as f:
+              bandit = json.load(f)
+
+          sarif = {
+              "version": "2.1.0",
+              "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+              "runs": [{
+                  "tool": {
+                      "driver": {
+                          "name": "Bandit",
+                          "version": "1.0.0",
+                          "rules": []
+                      }
+                  },
+                  "results": [
+                      {
+                          "ruleId": r.get("test_id", "unknown"),
+                          "message": {"text": r.get("issue_text", "")},
+                          "level": (
+                              "error" if r.get("issue_severity") == "HIGH"
+                              else "warning" if r.get("issue_severity") == "MEDIUM"
+                              else "note"
+                          ),
+                          "locations": [{
+                              "physicalLocation": {
+                                  "artifactLocation": {
+                                      "uri": r.get("filename", "").replace("./", "inventario-api/")
+                                  },
+                                  "region": {
+                                      "startLine": r.get("line_number", 1)
+                                  }
+                              }
+                          }]
+                      }
+                      for r in bandit.get("results", [])
+                  ]
+              }]
+          }
+
+          with open("bandit-report.sarif", "w") as f:
+              json.dump(sarif, f, indent=2)
+
+          print(f"Convertido: {len(sarif['runs'][0]['results'])} resultados")
+          EOF
+
+      - name: Subir SARIF a GitHub Security
+        uses: github/codeql-action/upload-sarif@v4
         with:
-          args: convert --tool Bandit --output ${{ github.workspace }}/bandit-report.sarif ${{ github.workspace }}/bandit-report.json
+          sarif_file: bandit-report.sarif
+          category: bandit-sast
 
       - name: Subir SARIF a GitHub Security
         uses: github/codeql-action/upload-sarif@v4
