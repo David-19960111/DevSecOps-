@@ -63,18 +63,15 @@ jobs:
         run: |
           bandit -r . \
             --exclude ./tests \
-            -f json \
-            -o bandit-report.json \
+            -f html \
+            -o bandit-report.html \
             --severity-level medium || true
-
-      - name: Mostrar reporte
-        run: bandit -r . --exclude ./tests --severity-level medium || true
 
       - name: Subir reporte SAST
         uses: actions/upload-artifact@v4
         with:
           name: bandit-report
-          path: inventario-api/bandit-report.json
+          path: inventario-api/bandit-report.html
 
   # ─────────────────────────────────────────
   # JOB 3: SCA
@@ -108,14 +105,7 @@ jobs:
         run: |
           pip-audit \
             -r requirements.txt \
-            --format=json \
-            --output=pip-audit-report.json || true
-
-      - name: Upload report
-        uses: actions/upload-artifact@v4
-        with:
-          name: pip-audit-report
-          path: inventario-api/pip-audit-report.json
+            --format=columns || true
 
   # ─────────────────────────────────────────
   # JOB 3: Build y Push Docker
@@ -175,6 +165,24 @@ jobs:
         with:
           name: trivy-results
           path: trivy-results.sarif
+
+      - name: Escanear imagen con Trivy
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: ${{ env.DOCKER_IMAGE }}:latest
+          format: "template"
+          template: "@/contrib/html.tpl"
+          exit-code: "0"
+          severity: "CRITICAL,HIGH"
+          output: trivy-report.html
+
+      - name: Subir reporte HTML
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-report
+          path: trivy-report.html
+
+      
 
   # ─────────────────────────────────────────
   # JOB 5: DAST con OWASP ZAP
