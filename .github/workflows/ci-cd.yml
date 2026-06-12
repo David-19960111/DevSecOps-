@@ -47,6 +47,8 @@ jobs:
     name: 🔍 SAST - Bandit
     runs-on: ubuntu-latest
     needs: test
+    permissions:
+      security-events: write
     defaults:
       run:
         working-directory: inventario-api
@@ -69,14 +71,11 @@ jobs:
             -o bandit-report.json \
             --severity-level medium || true
 
-      - name: Mostrar reporte
-        run: bandit -r . --exclude ./tests --severity-level medium || true
-
-      - name: Subir reporte SAST
-        uses: actions/upload-artifact@v4
+      - name: Subir SARIF a Github Security
+        uses: github/codeql-action/upload-sarif@v3
         with:
-          name: bandit-report
-          path: inventario-api/bandit-report.json
+          sarif_file: inventario-api/bandit-report.sarif
+          category: bandit.sast
 
   # ─────────────────────────────────────────
   # JOB 3: Build y Push Docker
@@ -112,6 +111,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: docker
     if: github.ref == 'refs/heads/main'
+    permissions:
+      security-events: write
     steps:
       - uses: actions/checkout@v4
 
@@ -119,19 +120,15 @@ jobs:
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: ${{ env.DOCKER_IMAGE }}:latest
-          format: "table"
+          format: "sarif"
           exit-code: "0"           # Cambiá a "1" para que falle si hay CVEs críticos
           severity: "CRITICAL,HIGH"
-          output: trivy-report.txt
 
-      - name: Mostrar reporte Trivy
-        run: cat trivy-report.txt
-
-      - name: Subir reporte Trivy
-        uses: actions/upload-artifact@v4
+      - name: Subir SARIF a GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
         with:
-          name: trivy-report
-          path: trivy-report.txt
+          sarif_file: trivy-report.sarif
+          category: trivy-docker
 
   # ─────────────────────────────────────────
   # JOB 5: DAST con OWASP ZAP
@@ -141,6 +138,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: docker
     if: github.ref == 'refs/heads/main'
+    permissions:
+      security-events: write
     steps:
       - uses: actions/checkout@v4
 
@@ -162,18 +161,14 @@ jobs:
           rules_file_name: "inventario-api/.zap/rules.tsv"
           cmd_options: "-a"         
           fail_action: false  
-          allow_issue_writing: false  
+          artifact_name: zap-results 
 
-      - name: Subir reporte ZAP
-        uses: actions/upload-artifact@v4
+      - name: Subir SARIF a GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
         if: always()
         with:
-          name: zap-report
-          path: report_html.html
-
-      - name: Verificar archivos generados
-        if: always()
-        run: ls -lah
+          sarif_file: results.sarif    # 👈 ZAP lo genera automáticamente con este nombre
+          category: zap-dast
 
       - name: Detener contenedor
         if: always()
