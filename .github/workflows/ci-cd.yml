@@ -49,33 +49,35 @@ jobs:
     needs: test
     permissions:
       security-events: write
-    defaults:
-      run:
-        working-directory: inventario-api
     steps:
       - uses: actions/checkout@v4
 
-      - name: Configurar Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
       - name: Instalar Bandit
-        run: pip install bandit[toml]
+        run: pip install bandit
 
-      - name: Correr análisis SAST
+      - name: Correr Bandit y generar JSON
+        working-directory: inventario-api
         run: |
           bandit -r . \
             --exclude ./tests \
             -f json \
-            -o ${{ github.workspace }}/inventario-api/bandit-report.sarif \
+            -o ${{ github.workspace }}/bandit-report.json \
             --severity-level medium || true
 
-      - name: Subir SARIF a Github Security
+      - name: Convertir JSON a SARIF válido
+        uses: docker://ghcr.io/microsoft/sarif-multitool:latest
+        with:
+          args: convert --tool Bandit --output ${{ github.workspace }}/bandit-report.sarif ${{ github.workspace }}/bandit-report.json
+
+      - name: Subir SARIF a GitHub Security
         uses: github/codeql-action/upload-sarif@v4
         with:
-          sarif_file: ${{ github.workspace }}/inventario-api/bandit-report.sarif
-          category: bandit.sast
+          sarif_file: bandit-report.sarif
+          category: bandit-sast
 
  # ─────────────────────────────────────────
   # JOB 3: SCA
