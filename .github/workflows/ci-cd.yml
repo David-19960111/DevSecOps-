@@ -108,14 +108,17 @@ jobs:
             -f sarif \
             -o pip-audit-report.sarif || true
 
-      - name: Verificar que el SARIF existe  # 👈 debug útil
-        run: ls -la pip-audit-report.sarif
+      - name: Mostrar archivos
+        run: |
+          pwd
+          ls -la
+          find . -name "*.sarif"
 
       - name: Upload SARIF
         if: always()
         uses: github/codeql-action/upload-sarif@v4
         with:
-          sarif_file: inventario-api/pip-audit-report.sarif  # ruta desde raíz
+          sarif_file: pip-audit-report.sarif
           category: sca-pip-audit
 
 
