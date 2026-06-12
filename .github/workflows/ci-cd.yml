@@ -156,12 +156,13 @@ jobs:
         run: curl -f http://localhost:8000/ || exit 1
 
       - name: Correr OWASP ZAP Baseline Scan
-        uses: zaproxy/action-baseline@v0.12.0
+        uses: zaproxy/action-baseline@v0.14.0
         with:
           target: "http://localhost:8000"
           rules_file_name: "inventario-api/.zap/rules.tsv"
           cmd_options: "-a"         
-          fail_action: false        
+          fail_action: false   
+          allow_issue_writing: false     
 
       - name: Subir reporte ZAP
         uses: actions/upload-artifact@v4
