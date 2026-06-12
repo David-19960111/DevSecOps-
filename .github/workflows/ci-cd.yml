@@ -166,21 +166,20 @@ jobs:
           name: trivy-results
           path: trivy-results.sarif
 
-      - name: Escanear imagen con Trivy - 2
+      - name: Escanear imagen con Trivy
         uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: ${{ env.DOCKER_IMAGE }}:latest
-          format: "template"
-          template: "@contrib/html.tpl"
+          format: "table"
           exit-code: "0"
           severity: "CRITICAL,HIGH"
-          output: trivy-report.html
+          output: trivy-report.txt
 
-      - name: Subir reporte HTML
+      - name: Subir reporte
         uses: actions/upload-artifact@v4
         with:
           name: trivy-report
-          path: trivy-report.html
+          path: trivy-report.txt
 
       
 
