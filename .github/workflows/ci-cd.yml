@@ -63,15 +63,18 @@ jobs:
         run: |
           bandit -r . \
             --exclude ./tests \
-            -f html \
-            -o bandit-report.html \
+            -f json \
+            -o bandit-report.json \
             --severity-level medium || true
+
+      - name: Mostrar reporte
+        run: bandit -r . --exclude ./tests --severity-level medium || true
 
       - name: Subir reporte SAST
         uses: actions/upload-artifact@v4
         with:
           name: bandit-report
-          path: inventario-api/bandit-report.html
+          path: inventario-api/bandit-report.json
 
   # ─────────────────────────────────────────
   # JOB 3: SCA
