@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+  security-events: write
+
 env:
   DOCKER_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/inventario-api
 
