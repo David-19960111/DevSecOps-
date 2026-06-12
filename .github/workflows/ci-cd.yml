@@ -108,7 +108,7 @@ jobs:
             --format=columns || true
 
   # ─────────────────────────────────────────
-  # JOB 3: Build y Push Docker
+  # JOB 4: Build y Push Docker
   # ─────────────────────────────────────────
   docker:
     name: 🐳 Build y Push Docker
@@ -136,7 +136,7 @@ jobs:
             ${{ env.DOCKER_IMAGE }}:${{ github.sha }}
 
   # ─────────────────────────────────────────
-  # JOB 4: Trivy - Scan de imagen Docker
+  # JOB 5: Trivy - Scan de imagen Docker
   # ─────────────────────────────────────────
   trivy:
     name: 🛡️ Trivy - Scan Docker
@@ -146,12 +146,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Escanear imagen con Trivy
+      - name: Escanear imagen con Trivy - 1
         uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: ${{ env.DOCKER_IMAGE }}:latest
           format: "sarif"
-          exit-code: "0"           # Cambiá a "1" para que falle si hay CVEs críticos
+          exit-code: "0"           
           severity: "CRITICAL,HIGH"
           output: 'trivy-results.sarif'
 
@@ -166,12 +166,12 @@ jobs:
           name: trivy-results
           path: trivy-results.sarif
 
-      - name: Escanear imagen con Trivy
+      - name: Escanear imagen con Trivy - 2
         uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: ${{ env.DOCKER_IMAGE }}:latest
           format: "template"
-          template: "@/contrib/html.tpl"
+          template: "@contrib/html.tpl"
           exit-code: "0"
           severity: "CRITICAL,HIGH"
           output: trivy-report.html
@@ -185,7 +185,7 @@ jobs:
       
 
   # ─────────────────────────────────────────
-  # JOB 5: DAST con OWASP ZAP
+  # JOB 6: DAST con OWASP ZAP
   # ─────────────────────────────────────────
   dast:
     name: 🕷️ DAST - OWASP ZAP
