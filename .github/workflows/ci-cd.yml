@@ -68,13 +68,13 @@ jobs:
           bandit -r . \
             --exclude ./tests \
             -f json \
-            -o bandit-report.json \
+            -o ${{ github.workspace }}/inventario-api/bandit-report.sarif \
             --severity-level medium || true
 
       - name: Subir SARIF a Github Security
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
-          sarif_file: inventario-api/bandit-report.sarif
+          sarif_file: ${{ github.workspace }}/inventario-api/bandit-report.sarif
           category: bandit.sast
 
  # ─────────────────────────────────────────
