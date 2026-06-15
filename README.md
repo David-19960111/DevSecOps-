@@ -6,6 +6,17 @@ This project demonstrates the implementation of DevSecOps practices throughout t
 
 The application is built using FastAPI and integrates automated security controls, containerization, CI/CD, vulnerability scanning, and monitoring.
 
+---
+
+![Python](https://img.shields.io/badge/Python-3.11-blue)
+![FastAPI](https://img.shields.io/badge/FastAPI-API-green)
+![Docker](https://img.shields.io/badge/Docker-Container-blue)
+![GitHub Actions](https://img.shields.io/badge/CI/CD-GitHub_Actions-black)
+![Trivy](https://img.shields.io/badge/Security-Trivy-red)
+![OWASP ZAP](https://img.shields.io/badge/DAST-OWASP_ZAP-orange)
+
+---
+
 ### Key Features
 
 * REST API built with FastAPI
@@ -341,15 +352,6 @@ These controls help ensure that only validated, tested, and security-scanned sof
 * Secure Containerization
 * Automated Security Testing
 * Monitoring and Observability
-
----
-
-![Python](https://img.shields.io/badge/Python-3.11-blue)
-![FastAPI](https://img.shields.io/badge/FastAPI-API-green)
-![Docker](https://img.shields.io/badge/Docker-Container-blue)
-![GitHub Actions](https://img.shields.io/badge/CI/CD-GitHub_Actions-black)
-![Trivy](https://img.shields.io/badge/Security-Trivy-red)
-![OWASP ZAP](https://img.shields.io/badge/DAST-OWASP_ZAP-orange)
 
 ---
 
