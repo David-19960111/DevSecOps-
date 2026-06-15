@@ -15,7 +15,7 @@ The application is built using FastAPI and integrates automated security control
 ![Trivy](https://img.shields.io/badge/Security-Trivy-red)
 ![OWASP ZAP](https://img.shields.io/badge/DAST-OWASP_ZAP-orange)
 
----
+----
 
 ### Key Features
 
