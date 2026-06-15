@@ -161,13 +161,31 @@ curl http://localhost:8000
 
 ---
 
-# 🧪 Testing
+# 🧪 Testing & Code Coverage
 
 Run unit tests:
 
 ```bash
 pytest -v
 ```
+
+Run Tests with Coverage:
+
+```bash
+pytest --cov=app --cov-report=term-missing
+```
+
+Generate HTML Coverage Report:
+
+```bash
+pytest --cov=app --cov-report=html
+```
+
+Coverage report location:
+
+* htmlcov/index.html
+
+The CI/CD pipeline automatically executes tests and generates coverage reports for every push and pull request.
 
 ---
 
