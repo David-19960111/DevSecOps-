@@ -98,9 +98,9 @@ GitHub Actions Pipeline
 ## Clone Repository
 
 ```bash
-git clone https://github.com/yourusername/devsecops-fastapi.git
+git clone https://github.com/yourusername/devsecops-.git
 
-cd devsecops-fastapi
+cd devsecops-
 ```
 
 ## Create Virtual Environment
@@ -243,20 +243,26 @@ The GitHub Actions workflow automatically performs:
 
 * Checkout source code
 * Install dependencies
+* Validate project structure
 
 ### 2. Test
 
-* Execute Pytest
+* Execute unit tests with Pytest
+* Generate code coverage reports
+* Upload coverage artifacts
+* Validate application quality
 
 ### 3. SAST
 
-* Run Bandit
-* Upload SARIF report
+* Run Bandit securiy scan
+* Detect insecure codig patters
+* Upload SARIF report to Github Security
 
 ### 4. SCA
 
-* Run pip-audit
-* Upload SARIF report
+* Run pip-audit dependency scan
+* Detect vulnerable third-party packages
+* Upload SARIF report to Github Security
 
 ### 5. Container Security
 
@@ -273,19 +279,37 @@ The GitHub Actions workflow automatically performs:
 ### 7. Release
 
 * Push image to Docker Hub
+* Store security artifacts
 
 ---
 
 # 📑 Generated Reports
 
-| Tool      | Report Type |
-| --------- | ----------- |
-| Bandit    | SARIF       |
-| pip-audit | SARIF       |
-| Trivy     | HTML        |
-| OWASP ZAP | HTML        |
+| Tool            | Report Type |
+| --------------- | ----------- |
+| Pytest Coverage | HTML/XML|
+| Bandit          | SARIF       |
+| pip-audit       | SARIF       |
+| Trivy           | HTML        |
+| OWASP ZAP       | HTML        |
 
-Reports are stored as GitHub Actions artifacts and security findings are uploaded to GitHub Security.
+Reports are stored as GitHub Actions artifacts and security findings are uploaded to GitHub Security whenever applicable.
+
+---
+
+# 🎯 Quality Gates
+
+The pipeline enforces several automated quality and security controls before a release can be published:
+
+* Successful execution of all unit tests
+* Code coverage report generation
+* Static code security analysis (SAST)
+* Dependency vulnerability assessment (SCA)
+* Container image vulnerability scanning
+* Dynamic application security testing (DAST)
+* Automated artifact generation and reporting
+
+These controls help ensure that only validated, tested, and security-scanned software reahces production environments.
 
 ---
 
@@ -299,6 +323,15 @@ Reports are stored as GitHub Actions artifacts and security findings are uploade
 * Secure Containerization
 * Automated Security Testing
 * Monitoring and Observability
+
+---
+
+![Python](https://img.shields.io/badge/Python-3.11-blue)
+![FastAPI](https://img.shields.io/badge/FastAPI-API-green)
+![Docker](https://img.shields.io/badge/Docker-Container-blue)
+![GitHub Actions](https://img.shields.io/badge/CI/CD-GitHub_Actions-black)
+![Trivy](https://img.shields.io/badge/Security-Trivy-red)
+![OWASP ZAP](https://img.shields.io/badge/DAST-OWASP_ZAP-orange)
 
 ---
 
